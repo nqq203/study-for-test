@@ -17,7 +17,7 @@ export default function Oauth() {
       const decodedAccessToken = JSON.parse(accessToken);
       localStorage.setItem('token', decodedAccessToken);
       setIsAuthenticated(true);
-      window.location.href = "http://localhost:3030/dashboard"
+      window.location.href = "https://study-for-test.onrender.com/dashboard"
     }
   }, [location, navigate, setIsAuthenticated]);
 
