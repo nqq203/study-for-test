@@ -27,20 +27,26 @@ function App() {
         <AppWrapper>
           {auth.isAuthenticated && <Header />}
           <Routes>
-            <Route path="/sign-in" element={<SignIn />} />
-            <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/test-list" element={<TestList />} />
-            <Route path="/test/:testId" element={<Test />} />
+            {/* Redirect based on authentication status */}
+            <Route path="/" element={<PrivateRoute />} />
+
+            {/* Public Routes */}
+            <Route path="/sign-in" element={<SignInWrapper />} />
+            <Route path="/sign-up" element={<SignUpWrapper />} />
+
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={<ProtectedRoute element={DashBoard} />} />
+            <Route path="/test-list" element={<ProtectedRoute element={TestList} />} />
+            <Route path="/test/:testId" element={<ProtectedRoute element={Test} />} />
             <Route path="/test/">
-              <Route path="speaking/:testId/:sectionId" element={<SpeakingTest />} />
+              <Route path="speaking/:testId/:sectionId" element={<ProtectedRoute element={SpeakingTest} />} />
               <Route path="writing/:testId/:sectionId" element={<WritingTest />} />
               <Route path="reading/:testId/:sectionId" element={<ReadingTest />} />
               <Route path="listening/:testId/:sectionId" element={<ListeningTest />} />
             </Route>
-            <Route path="/dashboard" element={<DashBoard />} />
-            <Route path="/instructor" element={<Instructor />} />
-            <Route path="/instructor/create" element={<InstructorCreate />} />
-            <Route path="/resources" element={<Resources />} />
+            <Route path="/instructor" element={<ProtectedRoute element={Instructor} />} />
+            <Route path="/instructor/create" element={<ProtectedRoute element={InstructorCreate} />} />
+            <Route path="/resources" element={<ProtectedRoute element={Resources} />} />
             <Route path="/oauth2" element={<Oauth />} />
           </Routes>
         </AppWrapper>
@@ -56,3 +62,31 @@ const AppWrapper = styled.div`
   flex-direction: column;
   min-height: 100vh;
 `;
+
+const PrivateRoute = () => {
+  const auth = useAuth(); // This should come from your Auth context
+  return auth.isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/sign-in" replace />;
+};
+
+function SignInWrapper() {
+  const { isAuthenticated } = useAuth();
+  const token = localStorage.getItem('accessToken');
+  return !!token || isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn />;
+}
+
+function SignUpWrapper() {
+  const { isAuthenticated } = useAuth();
+  const token = localStorage.getItem('accessToken');
+  return !!token || isAuthenticated ? <Navigate to="/dashboard" /> : <SignUp />;
+}
+
+function ProtectedRoute({ element }) {
+  const { isAuthenticated } = useAuth();
+  const token = localStorage.getItem('accessToken');
+  const RouteElement = element;
+  return !!token || isAuthenticated ? (
+    <RouteElement />
+  ) : (
+    <Navigate to="/sign-in" replace />
+  );
+}

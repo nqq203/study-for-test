@@ -33,7 +33,7 @@ export async function signOut() {
 }
 
 export async function signInWithGoogle() {
-  window.location.href = `http://localhost:8080/users/google`;
+  window.location.href = `https://study-for-test-backend-1.onrender.com/users/google`;
 }
 
 export async function getUserInfo() {
