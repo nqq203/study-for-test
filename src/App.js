@@ -1,4 +1,4 @@
-import { Route, Routes, BrowserRouter, Navigate } from 'react-router-dom';
+import { Route, Routes, BrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth, AuthProvider } from './context/AuthContext';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -9,33 +9,43 @@ import WritingTest from './pages/WritingTest';
 import ReadingTest from './pages/ReadingTest';
 import ListeningTest from './pages/ListeningTest';
 import DashBoard from './pages/Dashboard';
+import TestList from './pages/TestList';
+import Test from './pages/Test';
+import Header from './components/Header';
+import Instructor from './pages/Instructor';
+import InstructorCreate from './pages/InstructorCreate';
+import Resources from './pages/Resources';
+import Oauth from './pages/Oauth2';
 
 const queryClient = new QueryClient();
 
 function App() {
+  const auth = useAuth();
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <AppWrapper>
-            <Routes>
-              <Route path="/sign-in" element={<SignIn />} />
-              <Route path="/sign-up" element={<SignUp />} />
-              <Route path="/test" element={<div></div>}>
-                <Route path="speaking" element={<SpeakingTest />} />
-                <Route path="writing" element={<WritingTest />} />
-                <Route path="reading" element={<ReadingTest />} />
-                <Route path="listening" element={<ListeningTest />} />
-              </Route>
-              <Route path="/dashboard" element={<DashBoard />} />
-              <Route path="/forgot-password" element={<SignIn />} />
-              <Route path="/" element={<SignIn />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </AppWrapper>
-        </QueryClientProvider>
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AppWrapper>
+          {auth.isAuthenticated && <Header />}
+          <Routes>
+            <Route path="/sign-in" element={<SignIn />} />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/test-list" element={<TestList />} />
+            <Route path="/test/:testId" element={<Test />} />
+            <Route path="/test/">
+              <Route path="speaking/:testId/:sectionId" element={<SpeakingTest />} />
+              <Route path="writing/:testId/:sectionId" element={<WritingTest />} />
+              <Route path="reading/:testId/:sectionId" element={<ReadingTest />} />
+              <Route path="listening/:testId/:sectionId" element={<ListeningTest />} />
+            </Route>
+            <Route path="/dashboard" element={<DashBoard />} />
+            <Route path="/instructor" element={<Instructor />} />
+            <Route path="/instructor/create" element={<InstructorCreate />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/oauth2" element={<Oauth />} />
+          </Routes>
+        </AppWrapper>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 
@@ -46,37 +56,3 @@ const AppWrapper = styled.div`
   flex-direction: column;
   min-height: 100vh;
 `;
-
-// const MainContent = styled.main`
-//   flex: 1;
-//   // Apply necessary padding or margins as needed for your layout
-// `;
-
-// function SignInWrapper() {
-//   const { isAuthenticated } = useAuth();
-//   const token = localStorage.getItem('accessToken');
-//   return !!token || isAuthenticated ? <Navigate to="/" /> : <SignIn />;
-// }
-
-// function SignUpWrapper() {
-//   const { isAuthenticated } = useAuth();
-//   const token = localStorage.getItem('accessToken');
-//   return !!token || isAuthenticated ? <Navigate to="/" /> : <SignUp />;
-// }
-
-// function ForgotPasswordWrapper() {
-//   const { isAuthenticated } = useAuth();
-//   const token = localStorage.getItem('accessToken');
-//   return !!token || isAuthenticated ? <Navigate to="/" /> : <ForgotPassword />;
-// }
-
-// function PrivateRoute({ element }) {
-//   const { isAuthenticated } = useAuth();
-//   const token = localStorage.getItem('accessToken');
-//   const RouteElement = element;
-//   return !!token || isAuthenticated ? (
-//     <RouteElement />
-//   ) : (
-//     <Navigate to="/sign-in" replace />
-//   );
-// }

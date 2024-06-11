@@ -1,9 +1,12 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, TextField, Grid, Paper, Typography } from '@mui/material';
 import Notification from "../components/Notification";
 import { useSignIn } from "../hooks/api_hooks/user";
+import { signInWithGoogle } from "../apis/user";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function SignIn() {
   const [notification, setNotification] = useState({
@@ -11,8 +14,16 @@ export default function SignIn() {
     visible: false,
     bgColor: 'var(--color-success-darker)'
   });
+  const navigate = useNavigate();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
 
   const {mutate: signIn, isLoading, isError, error } = useSignIn();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -39,11 +50,10 @@ export default function SignIn() {
     }
     signIn({email: data.get('email'), password: data.get('password')}, {
       onSuccess: (data) => {
-        console.log(data);
         if (data.success) {
           localStorage.setItem('token', data.metadata.token);
-          window.location.href ='/dashboard';
-          return;
+          setIsAuthenticated(true);
+          navigate("/dashboard");
         } 
         setNotification({
           message: data.message,
@@ -53,6 +63,10 @@ export default function SignIn() {
       },
     })
   };
+
+  async function signInGoogle() {
+    await signInWithGoogle();
+  } 
 
   return <SignInWrapper>
     <Notification message={notification.message} visible={notification.visible} bgColor={notification.bgColor} onClose={() => {setNotification({...notification, visible: false})}}/>
@@ -91,19 +105,14 @@ export default function SignIn() {
           Sign In
         </Button>
         <GoogleButton
-          type="submit"
           fullWidth
           variant="contained"
           sx={{ mt: 2, mb: 2 }}
+          onClick={signInGoogle}
         >
           <img src="assets/google.png" alt="google" style={{width: "30px"}}/><div>Sign In with Google Account</div>
         </GoogleButton>
         <Grid container>
-          <Grid item xs>
-            <Link to="/forgot-password" variant="body2">
-              Forgot Password
-            </Link>
-          </Grid>
           <Grid item>
             <Link to="/sign-up" variant="body2">
               Don't have an account? Sign Up
