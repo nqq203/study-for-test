@@ -62,7 +62,7 @@ export default function TestList() {
             </TestPaper>
           </Grid>
         ))}</>:
-        <div style={{margin: "50px auto"}}>No test found</div>}
+        <div style={{margin: "30% auto", fontSize: "20px", fontWeight: "600"}}>No test found</div>}
       </Grid>
     </Wrapper>
   );

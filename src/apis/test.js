@@ -44,7 +44,8 @@ export async function getListTestNotDone() {
 }
 
 export async function getTestDetail(testId) {
-  const { data } = await api.get( `/tests/get-test-detail/${testId}`);
+  const userId = jwtDecode(localStorage.getItem('token'), process.env.JWT_SECRET_KEY).userId;
+  const { data } = await api.get( `/tests/get-test-detail/${userId}/${testId}`);
   return data;
 }
 
@@ -180,5 +181,10 @@ export async function createTestResults({testId, file}) {
       'Accept': 'application/json'
     }
   });
+  return data;
+}
+
+export async function deleteTest({testId}) {
+  const { data } = await api.delete(`/tests/delete-test/${testId}`);
   return data;
 }

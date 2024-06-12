@@ -23,12 +23,20 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessToken, setToken]  = useState(localStorage.getItem('token'));
   useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Clearing token...");
+      localStorage.removeItem('token');
+      setToken(null);
+      setIsAuthenticated(false);
+      window.location.reload();
+    }, 3600000);
     if (accessToken) {
       setIsAuthenticated(true);
     } else {
       // No token, ensure user is logged out
       setIsAuthenticated(false);
     }
+    return () => clearInterval(interval);
   }, [accessToken]);
 
   return (

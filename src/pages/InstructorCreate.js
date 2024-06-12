@@ -14,15 +14,14 @@ export default function InstructorCreate() {
   const [writingFile, setWritingFile] = useState(null);
   const [resultsFile, setResultsFile] = useState(null);
   const [audioUrl, setAudioUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState({
     message: '',
     visible: false,
     bgColor: 'var(--color-success-darker)'
   });
   const { mutate: createTest } = useCreateTest();
-  const { mutate: createTestContent } = useCreateTestContentByPdf();
-  const { mutate: createTestResults } = useCreateTestResults();
+  const { mutate: createTestContent, isLoading: isLoadingTestContent } = useCreateTestContentByPdf();
+  // const { mutate: createTestResults, isLoading: isLoadingTestResults } = useCreateTestResults();
   const navigate = useNavigate();
 
   const handleSubmit = () => {
@@ -74,74 +73,42 @@ export default function InstructorCreate() {
         bgColor: 'red'
       })
     }
-    const pdfFiles = [readingFile, listeningFile, speakingFile, writingFile];
-    const file = resultsFile;
-    console.log(file);
+    const pdfFiles = [readingFile, listeningFile, speakingFile, writingFile, resultsFile];
+    // const file = resultsFile;
+    // console.log(file);
     console.log(pdfFiles);
     console.log(audioUrl);
     console.log(testName);
     createTest({ testName: testName }, {
-      onSuccess: (data) => {
-        if (data?.success) {
-          const testId = data?.metadata?.testId;
+      onSuccess: (data1) => {
+        console.log("data1", data1)
+        if (data1?.success) {
+          const testId = data1?.metadata?.testId;
           createTestContent({ testId: testId, audioUrl: audioUrl, pdfFiles: pdfFiles }, {
-            onMutate: () => {
-              setIsLoading(true);
-            },
-            onSuccess: (data) => {
-              if (data?.success) {
-                createTestResults({ testId: testId, file: file }, {
-                  onMutate: () => {
-                    setIsLoading(true);
-                  },
-                  onSuccess: (data) => {
-                    if (data?.success) {
-                      setNotification({
-                        message: "Create test successfully",
-                        visible: true,
-                        bgColor: 'green'
-                      })
-                      navigate("/instructor");
-                    }
-                    else {
-                      setNotification({
-                        message: data.message,
-                        visible: true,
-                        bgColor: 'red'
-                      })
-                    }
-                  }
-                });
-              }
-              else {
+            onSuccess: (data2) => {
+             console.log("data2", data2)
+              if (data2?.success) {
                 setNotification({
-                  message: data.message,
+                  message: "Create test successfully",
                   visible: true,
-                  bgColor: 'red'
+                  bgColor: 'green'
                 })
               }
+              navigate("/instructor");
             }
           });
-        }
-        else {
-          setNotification({
-            message: data.message,
-            visible: true,
-            bgColor: 'red'
-          })
         }
       },
     });
   };
 
+  if (isLoadingTestContent) return <div style={{ margin: "20% auto", justifyContent: "center" }}>
+    <ClipLoader size={35} color="var(--color-blue-4)" />
+  </div>
+  
   return (
     <Wrapper>
       <Notification message={notification.message} visible={notification.visible} bgColor={notification.bgColor} onClose={() => { setNotification({ ...notification, visible: false }) }} />
-      {isLoading ?
-        <div style={{ margin: "30% auto", justifyContent: "center" }}>
-          <ClipLoader size={35} color="var(--color-blue-4)" />
-        </div>
-        :
         <TestCreateContainer>
           <TestCreateCard>
             <CardContent>
@@ -291,7 +258,7 @@ export default function InstructorCreate() {
           <Button variant="contained" color="primary" onClick={handleSubmit}>
             Create Test
           </Button>
-        </TestCreateContainer>}
+        </TestCreateContainer>
     </Wrapper>
   );
 }

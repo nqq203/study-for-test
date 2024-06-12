@@ -16,6 +16,7 @@ import Instructor from './pages/Instructor';
 import InstructorCreate from './pages/InstructorCreate';
 import Resources from './pages/Resources';
 import Oauth from './pages/Oauth2';
+// import Sample from './pages/Sample';
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ function App() {
             <Route path="/instructor/create" element={<ProtectedRoute element={InstructorCreate} />} />
             <Route path="/resources" element={<ProtectedRoute element={Resources} />} />
             <Route path="/oauth2" element={<Oauth />} />
+            {/* <Route path="/sample" element={<Sample />} /> */}
           </Routes>
         </AppWrapper>
       </QueryClientProvider>

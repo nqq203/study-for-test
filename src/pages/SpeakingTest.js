@@ -6,6 +6,7 @@ import { Button } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetSectionDetail, useSubmitSpeakingTest } from "../hooks/api_hooks/test";
+import Notification from "../components/Notification";
 
 export default function SpeakingTest() {
   const { testId, sectionId } = useParams();
@@ -17,6 +18,11 @@ export default function SpeakingTest() {
   const [file, setFile] = useState(null);
   const userId = jwtDecode(localStorage.getItem('token'), process.env.JWT_SECRET_KEY).userId;
   const { mutate: submitTest } = useSubmitSpeakingTest();
+  const [notification, setNotification] = useState({
+    message: '',
+    visible: false,
+    bgColor: 'var(--color-success-darker)'
+  });
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -60,11 +66,26 @@ export default function SpeakingTest() {
   }, [currentGroupDescription])
 
   const handleSubmit = async () => {
+    if (!file) {
+      setNotification({
+        message: "Please select a file",
+        visible: true,
+        bgColor:'red'
+      });
+      return;
+    }
     // Chuyển đổi answers từ object sang mảng của các object
     submitTest({ userId: userId, testId: testId, sectionId: sectionId, fileZip: file }, {
       onSuccess: (data) => {
         if (data.success) {
-          navigate(`/test/${testId}`);
+          setNotification({
+            message: "Submit successfully",
+            visible: true,
+            bgColor: 'green'
+          })
+          setTimeout(() => {
+            navigate(`/test/${testId}`);
+          }, 2000); 
         }
       },
     })
@@ -72,6 +93,7 @@ export default function SpeakingTest() {
 
 
   return <Wrapper>
+    <Notification message={notification.message} visible={notification.visible} bgColor={notification.bgColor} onClose={() => setNotification({ ...notification, visible: false })} />
     <LeftPanel>
       <h3>Đề bài (bài làm các phần nói sẽ được nộp bằng cách nén zip - bao gồm các files audio/mp3)</h3>
       <p id="question-text" style={{fontWeight: "500", fontSize: "18px"}}></p>

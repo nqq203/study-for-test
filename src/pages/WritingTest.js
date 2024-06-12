@@ -6,6 +6,7 @@ import { Button } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetSectionDetail, useSubmitWritingTest } from "../hooks/api_hooks/test";
 import { jwtDecode } from "jwt-decode";
+import Notification from '../components/Notification';
 
 export default function WritingTest() {
   const { testId, sectionId } = useParams();
@@ -19,6 +20,11 @@ export default function WritingTest() {
   const [file, setFile] = useState(null);
   const userId = jwtDecode(localStorage.getItem('token'), process.env.JWT_SECRET_KEY).userId;
   const { mutate: submitTest } = useSubmitWritingTest();
+  const [notification, setNotification] = useState({
+    message: '',
+    visible: false,
+    bgColor: 'green'
+  });
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -60,19 +66,34 @@ export default function WritingTest() {
   };
 
   const handleSubmit = async () => {
+    if (!file) {
+      setNotification({
+        message: "Please select a file",
+        visible: true,
+        bgColor:'red'
+      })
+    }
     // Chuyển đổi answers từ object sang mảng của các object
     const formattedAnswers = Object.entries(inputAnswers).map(([key, value]) => (value));
 
     submitTest({ userId: userId, testId: testId, sectionId: sectionId, userAnswer: formattedAnswers, fileZip: file }, {
       onSuccess: (data) => {
         if (data.success) {
-          navigate(`/test/${testId}`);
+          setNotification({
+            message: "Submit successfully",
+            visible: true,
+            bgColor: 'green'
+          })
+          setTimeout(() => {
+            navigate(`/test/${testId}`);
+          }, 2000); 
         }
       },
     })
   };
   
   return <Wrapper>
+    <Notification message={notification.message} visible={notification.visible} bgColor={notification.bgColor} onClose={() => setNotification({ ...notification, visible: false })} />
     <LeftPanel>
       <h3>Đề bài (bài làm các phần viết sẽ được nộp bằng cách nén zip - bao gồm các files pdf hoặc word)</h3>
       <p style={{fontWeight: "500", fontSize: "18px"}}>{currentGroupDescription}</p>
@@ -90,7 +111,8 @@ export default function WritingTest() {
     </LeftPanel>
     <RightPanel>
       {listAnswers?.map((answer, idx) => 
-        <div key={idx}>
+        <div key={idx} style={{display: "flex", flexDirection: "column", gap: "5px"}}>
+          <div>({idx + 1})</div>
           <QuestionInput
             value={inputAnswers[idx] || ''}
             onChange={(e) => handleInputChange(e, idx)}
@@ -152,6 +174,7 @@ const RightPanel = styled.div`
   height: 50%;
   max-height: 400px;
   overflow-y: scroll;
+  margin-top: 50px;
   &::-webkit-scrollbar {
     width: 5px;
   }

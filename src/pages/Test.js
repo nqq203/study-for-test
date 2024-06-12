@@ -8,6 +8,7 @@ import { useGetTestDetail, useGetTestResult, useGetUserAnswer } from "../hooks/a
 import { BsFillQuestionSquareFill } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { setTestDetail } from "../redux/testSlice";
+import { DotLoader } from "react-spinners";
 
 
 export default function Test() {
@@ -49,7 +50,9 @@ export default function Test() {
     });
   }, [userAnswer]);
 
-  if (isLoading) return <div style={{margin: "0 auto"}}>Loading...</div>;
+  if (isLoading) return <div style={{margin: "20% auto"}}>
+    <DotLoader size={35} color="var(--color-blue-4)"/>
+  </div>;
 
   // Render logic here
   return <Wrapper>

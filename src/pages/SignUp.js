@@ -61,7 +61,7 @@ export default function SignUp() {
           });
           setTimeout(() => {
             navigate("/sign-in");
-          }, 3000); 
+          }, 2000); 
         } else {
           setNotification({
             message: data.message,

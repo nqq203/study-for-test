@@ -3,11 +3,14 @@ import styled from 'styled-components';
 import { Button, TextField } from '@mui/material';
 import { Card, CardContent, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useGetInstructorTest, useSearchIntructorTest } from '../hooks/api_hooks/test';
+import { useDeleteTest, useGetInstructorTest, useSearchIntructorTest } from '../hooks/api_hooks/test';
 import { jwtDecode } from 'jwt-decode';
 import { PiIdentificationCardFill } from "react-icons/pi";
 import { FaRegNoteSticky } from "react-icons/fa6";
 import { BsCalendarDate } from "react-icons/bs";
+import { FaDeleteLeft } from "react-icons/fa6";
+import { DotLoader } from 'react-spinners';
+import Notification from '../components/Notification';
 
 
 export default function Instructor() {
@@ -24,7 +27,7 @@ export default function Instructor() {
   // ];
   const navigate = useNavigate();
   const userId = jwtDecode(localStorage.getItem('token'), process.env.JWT_SECRET_KEY).userId;
-  const { data: tests } = useGetInstructorTest(userId);
+  const { data: tests, refetch: refetchTest } = useGetInstructorTest(userId);
   const [testData, setTestData] = useState([]);
 
   useEffect(() => {
@@ -32,7 +35,13 @@ export default function Instructor() {
   }, [tests]);
 
   const [input, setInput] = useState('');
-  const { mutate: search } = useSearchIntructorTest(input);
+  const { mutate: search, isLoading: isSearchLoading } = useSearchIntructorTest(input);
+  const { mutate: deleteTest, isLoading: isDeleteLoading } = useDeleteTest();
+  const [notification, setNotification] = useState({
+    message: '',
+    visible: false,
+    bgColor: 'green'
+  });
 
   async function submitInput(event) {
     if (event.key === 'Enter') {
@@ -48,8 +57,29 @@ export default function Instructor() {
     }
   }
 
+  async function handleDelete(testId) {
+    deleteTest({testId: Number(testId)}, {
+      onSuccess: (data) => {
+        if (data?.success || data?.code === 200) {
+          setNotification({
+            message: data.message,
+            visible: true,
+            bgColor: 'green'
+          })
+          refetchTest(userId);
+        }
+      }
+    })
+  }
+
+
+  if (isSearchLoading || isDeleteLoading) return <div style={{margin: "30% auto"}}>
+    <DotLoader size={35} color="var(--color-blue-4)"/>
+  </div>;
+
   return (
     <Wrapper>
+      <Notification message={notification.message} visible={notification.visible} bgColor={notification.bgColor} onClose={() => { setNotification({ ...notification, visible: false }) }} />
       <SearchCreateContainer>
         <StyledTextField
           id="search-test"
@@ -68,8 +98,8 @@ export default function Instructor() {
         {testData?.length > 0 ? 
         <>
         {testData?.map(test => (
-          <TestCard key={test.id}>
-            <CardContent>
+          <TestCard key={test.testId}>
+            <CardContent style={{position: "relative"}}>
               <Typography variant="h6" component="div">
                 <FaRegNoteSticky /> Test Name: {test?.testName}
               </Typography>
@@ -79,6 +109,9 @@ export default function Instructor() {
               <Typography variant="h6" component="div">
                 <BsCalendarDate /> Date Created: {test?.dateCreated} 
               </Typography>
+              <div style={{position: "absolute", top: "10px", right: "20px", cursor: "pointer"}} onClick={() => handleDelete(test?.testId)}>
+                <FaDeleteLeft size={25}/>
+              </div>
             </CardContent>
           </TestCard>
         ))}

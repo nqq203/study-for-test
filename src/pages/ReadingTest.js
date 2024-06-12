@@ -9,6 +9,7 @@ import { useGetSectionDetail, useSubmitReadingTest } from "../hooks/api_hooks/te
 import { useSelector, useDispatch } from "react-redux";
 import { jwtDecode } from "jwt-decode";
 import { setTestScore } from "../redux/testSlice";
+import Notification from "../components/Notification";
 
 export default function ReadingTest() {
   const { testId, sectionId } = useParams();
@@ -22,6 +23,11 @@ export default function ReadingTest() {
   const userId = jwtDecode(localStorage.getItem('token'), process.env.JWT_SECRET_KEY).userId;
   const { mutate: submitTest } = useSubmitReadingTest();
   const navigate = useNavigate();
+  const [notification, setNotification] = useState({
+    message: '',
+    visible: false,
+    bgColor: 'green'
+  });
 
   useEffect(() => {
     if (sectionDetailData) {
@@ -55,13 +61,21 @@ export default function ReadingTest() {
     submitTest({ userId: userId, testId: testId, sectionId: sectionId, userAnswer: formattedAnswers }, {
       onSuccess: (data) => {
         if (data.success) {
-          navigate(`/test/${testId}`);
+          setNotification({
+            message: "Submit successfully",
+            visible: true,
+            bgColor: 'green'
+          })
+          setTimeout(() => {
+            navigate(`/test/${testId}`);
+          }, 2000); 
         }
       },
     })
   };
 
   return <Wrapper>
+    <Notification message={notification.message} visible={notification.visible} bgColor={notification.bgColor} onClose={() => setNotification({ ...notification, visible: false })} />
     <LeftPanel>
       {currentGroup && (
         <div>

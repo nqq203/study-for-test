@@ -8,6 +8,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useGetSectionDetail, useSubmitListeningTest } from "../hooks/api_hooks/test";
+import Notification from "../components/Notification";
 
 export default function ListeningTest() {
   const { testId, sectionId } = useParams();
@@ -19,6 +20,11 @@ export default function ListeningTest() {
   const userId = jwtDecode(localStorage.getItem('token'), process.env.JWT_SECRET_KEY).userId;
   const { mutate: submitTest } = useSubmitListeningTest();
   const navigate = useNavigate();
+  const [notification, setNotification] = useState({
+    message: '',
+    visible: false,
+    bgColor: 'green'
+  });
 
   const handleSubmit = async () => {
     // Chuyển đổi answers từ object sang mảng của các object
@@ -30,7 +36,14 @@ export default function ListeningTest() {
     submitTest({ userId: userId, testId: testId, sectionId: sectionId, userAnswer: formattedAnswers }, {
       onSuccess: (data) => {
         if (data.success) {
-          navigate(`/test/${testId}`);
+          setNotification({
+            message: "Submit successfully",
+            visible: true,
+            bgColor: 'green'
+          })
+          setTimeout(() => {
+            navigate(`/test/${testId}`);
+          }, 2000); 
         }
       },
     })
@@ -46,6 +59,7 @@ export default function ListeningTest() {
 
   return (
     <Wrapper>
+    <Notification message={notification.message} visible={notification.visible} bgColor={notification.bgColor} onClose={() => setNotification({ ...notification, visible: false })} />
       <AudioPlayerContainer>
         <AudioPlayer src="https://drive.google.com/file/d/1SB2zjvROEnBiXETp3YzoWsWSn7MOI1z_/preview"/>
       </AudioPlayerContainer>

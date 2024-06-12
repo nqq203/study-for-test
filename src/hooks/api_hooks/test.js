@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "react-query";
-import { getHistoryBoard, getWeeklyActivity, getListTest, getListTestDone, getListTestNotDone, getTestDetail, getTestResult, getUserAnswer, getSectionDetail, submitReadingTest, submitListeningTest, submitWritingTest, submitSpeakingTest, getResources, getInstructorTest, searchInstructorTest, createTestResults, createTest, createTestContentByPdf } from "../../apis/test";
+import { getHistoryBoard, getWeeklyActivity, getListTest, getListTestDone, getListTestNotDone, getTestDetail, getTestResult, getUserAnswer, getSectionDetail, submitReadingTest, submitListeningTest, submitWritingTest, submitSpeakingTest, getResources, getInstructorTest, searchInstructorTest, createTestResults, createTest, createTestContentByPdf, deleteTest } from "../../apis/test";
 
 export function useGetHistoryBoard() {
   return useQuery("historyBoard", getHistoryBoard);
@@ -87,4 +87,8 @@ export function useCreateTest() {
 
 export function useCreateTestContentByPdf() {
   return useMutation(createTestContentByPdf);
+}
+
+export function useDeleteTest() {
+  return useMutation(deleteTest);
 }
