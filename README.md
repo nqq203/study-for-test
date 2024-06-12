@@ -10,7 +10,7 @@ In api, you should change the baseUrl from backend url into http://locahost:8080
 ### 1. Clone Project
 ```bash
 git clone https://github.com/nqq203/study-for-test.git
-cd udemy-app
+cd study-for-test
 ```
 
 ### 2. Install dependencies
